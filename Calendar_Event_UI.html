@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Formulaire Événement</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      background: #f4f4f4;
+    }
+    form {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 8px;
+      max-width: 500px;
+      margin: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin: 0.5rem 0 0.2rem;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 0.6rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 0.7rem 1.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .message {
+      text-align: center;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h2 style="text-align: center;">Ajouter / Modifier un événement</h2>
+  <form id="eventForm">
+    <label for="title">Titre</label>
+    <input type="text" id="title" name="title" required>
+
+    <label for="description">Description</label>
+    <textarea id="description" name="description"></textarea>
+
+    <label for="start">Début (format ISO)</label>
+    <input type="datetime-local" id="start" name="start" required>
+
+    <label for="end">Fin (format ISO)</label>
+    <input type="datetime-local" id="end" name="end" required>
+
+    <label for="eventId">eventId (laisser vide pour créer)</label>
+    <input type="text" id="eventId" name="eventId">
+
+    <button type="submit">Envoyer</button>
+  </form>
+
+  <div class="message" id="response"></div>
+
+  <script>
+    const form = document.getElementById('eventForm');
+    const responseBox = document.getElementById('response');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const payload = {
+        title: form.title.value,
+        description: form.description.value,
+        start: form.start.value,
+        end: form.end.value,
+        eventId: form.eventId.value
+      };
+
+      try {
+        const res = await fetch("https://n8n.front-populaire.info/webhook/formulaire-test", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await res.text();
+        responseBox.textContent = `Réponse : ${text}`;
+        responseBox.style.color = 'green';
+      } catch (err) {
+        responseBox.textContent = `Erreur : ${err.message}`;
+        responseBox.style.color = 'red';
+      }
+    });
+  </script>
+</body>
+</html>

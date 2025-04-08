@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestion d'événements Calendrier</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 2em; background-color: #f9f9f9; }
+    form { max-width: 500px; margin: auto; background: white; padding: 2em; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input, textarea { width: 100%; padding: 0.7em; margin-top: 1em; box-sizing: border-box; }
+    label { margin-top: 1em; display: block; font-weight: bold; }
+    button { margin-top: 2em; padding: 0.7em; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background-color: #218838; }
+  </style>
+</head>
+<body>
+  <h2 style="text-align:center;">Ajouter ou modifier un événement</h2>
+  <form id="event-form">
+    <label for="title">Titre</label>
+    <input type="text" id="title" name="title" required>
+
+    <label for="description">Description</label>
+    <textarea id="description" name="description"></textarea>
+
+    <label for="start">Date et heure de début</label>
+    <input type="datetime-local" id="start" name="start" required>
+
+    <label for="end">Date et heure de fin</label>
+    <input type="datetime-local" id="end" name="end" required>
+
+    <label for="eventId">eventId (laisser vide pour créer)</label>
+    <input type="text" id="eventId" name="eventId">
+
+    <button type="submit">Envoyer</button>
+  </form>
+
+  <script>
+    document.getElementById('event-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const payload = {
+        title: document.getElementById('title').value,
+        description: document.getElementById('description').value,
+        start: document.getElementById('start').value,
+        end: document.getElementById('end').value,
+        eventId: document.getElementById('eventId').value.trim()
+      };
+
+      try {
+        const response = await fetch('https://n8n.front-populaire.info/webhook/formulaire-test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          alert('Données envoyées avec succès !');
+        } else {
+          alert('Erreur lors de l’envoi : ' + response.statusText);
+        }
+      } catch (error) {
+        alert('Erreur réseau : ' + error.message);
+      }
+    });
+  </script>
+</body>
+</html>
