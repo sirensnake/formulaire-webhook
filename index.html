@@ -1,43 +1,99 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Formulaire vers Webhook n8n</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestionnaire de Calendrier</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { margin-top: 40px; }
+    input, textarea, button { display: block; margin-bottom: 10px; width: 100%; max-width: 500px; }
+    table { border-collapse: collapse; margin-top: 20px; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f4f4f4; }
+  </style>
 </head>
 <body>
-  <h1>Formulaire vers n8n</h1>
-  <form id="webhookForm">
-    <label for="nom">Nom :</label>
-    <input type="text" id="nom" name="nom" required /><br />
+  <h1>📅 Tableau de bord du calendrier</h1>
 
-    <label for="email">Email :</label>
-    <input type="email" id="email" name="email" required /><br />
+  <!-- Formulaire création / mise à jour -->
+  <h2>Créer ou mettre à jour un événement</h2>
+  <form id="event-form">
+    <label for="eventId">ID de l'événement (laisser vide pour créer)</label>
+    <input type="text" id="eventId" name="eventId">
 
-    <label for="message">Message :</label>
-    <textarea id="message" name="message" required></textarea><br />
+    <label for="title">Titre</label>
+    <input type="text" id="title" name="title" required>
 
-    <button type="submit">Envoyer</button>
+    <label for="description">Description</label>
+    <textarea id="description" name="description"></textarea>
+
+    <label for="start">Début (ISO 8601)</label>
+    <input type="datetime-local" id="start" name="start" required>
+
+    <label for="end">Fin (ISO 8601)</label>
+    <input type="datetime-local" id="end" name="end" required>
+
+    <button type="submit">Soumettre</button>
   </form>
 
+  <!-- Zone d'affichage dynamique -->
+  <h2>Événements à venir</h2>
+  <table id="events-table">
+    <thead>
+      <tr>
+        <th>ID</th><th>Titre</th><th>Description</th><th>Début</th><th>Fin</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
   <script>
-    document.getElementById("webhookForm").addEventListener("submit", async function (e) {
+    const webhookCreate = 'https://n8n.front-populaire.info/webhook/formulaire-test'; // ton webhook POST
+    const webhookRead = 'https://n8n.front-populaire.info/webhook/get-events'; // à créer côté n8n
+
+    document.getElementById('event-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const data = {
-        nom: document.getElementById("nom").value,
-        email: document.getElementById("email").value,
-        message: document.getElementById("message").value,
+
+      const payload = {
+        eventId: document.getElementById('eventId').value,
+        title: document.getElementById('title').value,
+        description: document.getElementById('description').value,
+        start: document.getElementById('start').value,
+        end: document.getElementById('end').value
       };
 
-      await fetch("https://n8n.front-populaire.info/webhook/formulaire-test", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      alert("Données envoyées !");
+      try {
+        const res = await fetch(webhookCreate, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) alert('✅ Événement soumis avec succès !');
+        else alert('❌ Erreur lors de la soumission.');
+        fetchEvents();
+      } catch (err) {
+        console.error('Erreur envoi:', err);
+      }
     });
+
+    async function fetchEvents() {
+      try {
+        const res = await fetch(webhookRead);
+        const data = await res.json();
+        const tbody = document.querySelector('#events-table tbody');
+        tbody.innerHTML = '';
+        data.forEach(ev => {
+          const row = document.createElement('tr');
+          row.innerHTML = `<td>${ev.id}</td><td>${ev.summary}</td><td>${ev.description || ''}</td><td>${ev.start}</td><td>${ev.end}</td>`;
+          tbody.appendChild(row);
+        });
+      } catch (err) {
+        console.error('Erreur récupération événements :', err);
+      }
+    }
+
+    fetchEvents(); // charger à l'ouverture
   </script>
 </body>
 </html>
