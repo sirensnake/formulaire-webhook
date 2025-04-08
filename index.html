@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Formulaire vers Webhook n8n</title>
+</head>
+<body>
+  <h1>Formulaire vers n8n</h1>
+  <form id="webhookForm">
+    <label for="nom">Nom :</label>
+    <input type="text" id="nom" name="nom" required /><br />
+
+    <label for="email">Email :</label>
+    <input type="email" id="email" name="email" required /><br />
+
+    <label for="message">Message :</label>
+    <textarea id="message" name="message" required></textarea><br />
+
+    <button type="submit">Envoyer</button>
+  </form>
+
+  <script>
+    document.getElementById("webhookForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const data = {
+        nom: document.getElementById("nom").value,
+        email: document.getElementById("email").value,
+        message: document.getElementById("message").value,
+      };
+
+      await fetch("https://n8n.front-populaire.info/webhook/formulaire-test", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      alert("Données envoyées !");
+    });
+  </script>
+</body>
+</html>
